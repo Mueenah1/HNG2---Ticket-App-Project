@@ -1,0 +1,47 @@
+{% extends "_layout.twig" %}
+
+{% block content %}
+<div class="form-container">
+  <h2>{{ mode == 'login' ? 'Log In' : 'Sign Up' }}</h2>
+  <p>
+    {% if mode == 'login' %}
+      Don't have an account? <a href="auth.php?mode=signup">Sign up</a>
+    {% else %}
+      Already have an account? <a href="auth.php?mode=login">Log in</a>
+    {% endif %}
+  </p>
+
+  {% if toast_error %}
+    <div class="toast toast-error" style="position: relative; bottom: auto; right: auto; margin: 1rem 0">
+      {{ toast_error }}
+    </div>
+  {% endif %}
+
+  <form method="POST" action="auth.php">
+    <input type="hidden" name="form_mode" value="{{ mode }}">
+    
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" value="{{ form_data.email|default('') }}">
+      {% if errors.email %}<p class="form-error">{{ errors.email }}</p>{% endif %}
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password">
+      {% if errors.password %}<p class="form-error">{{ errors.password }}</p>{% endif %}
+    </div>
+    
+    {% if mode != 'login' %}
+    <div class="form-group">
+      <label for="confirmPassword">Confirm Password</label>
+      <input type="password" id="confirmPassword" name="confirmPassword">
+      {% if errors.confirmPassword %}<p class="form-error">{{ errors.confirmPassword }}</p>{% endif %}
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary" style="width: 100%">
+      {{ mode == 'login' ? 'Login' : 'Create Account' }}
+    </button>
+  </form>
+</div>
+{% endblock %}

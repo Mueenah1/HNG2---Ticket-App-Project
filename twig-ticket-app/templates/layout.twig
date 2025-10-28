@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ page_title|default('Ticket App') }} | Twig</title>
+    <link rel="stylesheet" href="../shared-assets/style.css" />
+  </head>
+  <body>
+
+    <header class="main-header">
+      <div class="app-container">
+        <a href="landing.php" class="logo">TicketApp</a>
+        <nav class="main-nav">
+          <div class="auth-links">
+            {% if auth.isAuthenticated %}
+              <a href="dashboard.php">Dashboard</a>
+              <a href="tickets.php">Tickets</a>
+              <a href="logout.php" class="btn btn-secondary">Logout</a>
+            {% else %}
+              <a href="auth.php?mode=login">Login</a>
+              <a href="auth.php?mode=signup" class="btn btn-primary">Get Started</a>
+            {% endif %}
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% if hide_footer is not defined %}
+    <footer class="main-footer">
+      <div class="app-container">
+        &copy; {{ "now"|date("Y") }} TicketApp. All rights reserved.
+      </div>
+    </footer>
+    {% endif %}
+
+  </body>
+</html>

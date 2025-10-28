@@ -1,0 +1,116 @@
+{% extends "_layout.twig" %}
+
+{# Macro for rendering the status tag #}
+{% macro statusTag(status) %}
+  <span class="status-tag status-{{ status|replace({'_': ''}) }}">
+    {{ status|replace({'_': ' '})|title }}
+  </span>
+{% endmacro %}
+
+{% from _self import statusTag %}
+
+{% block content %}
+<div class="main-content app-container">
+
+  {% if toast %}
+    <div class="toast toast-{{ toast.type }}">{{ toast.message }}</div>
+  {% endif %}
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem">
+    <h2>Ticket Management</h2>
+    {% if action == 'list' %}
+      <a href="tickets.php?action=create" class="btn btn-primary">Create New Ticket</a>
+    {% endif %}
+  </div>
+
+  {% if action == 'delete' %}
+    <div class="box">
+      <h3>Confirm Deletion</h3>
+      <p>Are you sure you want to delete the ticket: "<strong>{{ tickets[current_ticket.id|default(0)].title|default('Unknown') }}</strong>"?</p>
+      <div style="margin-top: 1.5rem;">
+        <a href="tickets.php?action=delete&id={{ current_ticket.id }}&confirm=true" class="btn btn-primary" style="background-color: var(--error);">Yes, Delete</a>
+        <a href="tickets.php" class="btn btn-secondary" style="margin-left: 1rem;">Cancel</a>
+      </div>
+    </div>
+  
+  {% elseif action == 'create' or action == 'edit' or (action == 'update' and errors) %}
+    <div class="form-container" style="margin: 0 0 2rem 0; max-width: 100%">
+      <h3>{{ action == 'edit' ? 'Edit Ticket' : 'Create New Ticket' }}</h3>
+      
+      <form method="POST" action="tickets.php">
+        {% if action == 'edit' or (action == 'update' and errors) %}
+          <input type="hidden" name="action" value="update">
+          <input type="hidden" name="id" value="{{ current_ticket.id }}">
+        {% else %}
+           <input type="hidden" name="action" value="create">
+        {% endif %}
+
+        {% if errors.general %}<p class="form-error">{{ errors.general }}</p>{% endif %}
+        
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input type="text" name="title" id="title" value="{{ current_ticket.title|default('') }}">
+          {% if errors.title %}<p class="form-error">{{ errors.title }}</p>{% endif %}
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea name="description" id="description">{{ current_ticket.description|default('') }}</textarea>
+        </div>
+
+        <div style="display: flex; gap: 1rem">
+          <div class="form-group" style="flex: 1">
+            <label for="status">Status</label>
+            <select name="status" id="status">
+              <option value="open" {{ current_ticket.status|default('open') == 'open' ? 'selected' }}>Open</option>
+              <option value="in_progress" {{ current_ticket.status|default('') == 'in_progress' ? 'selected' }}>In Progress</option>
+              <option value="closed" {{ current_ticket.status|default('') == 'closed' ? 'selected' }}>Closed</option>
+            </select>
+            {% if errors.status %}<p class="form-error">{{ errors.status }}</p>{% endif %}
+          </div>
+          <div class="form-group" style="flex: 1">
+            <label for="priority">Priority</label>
+            <select name="priority" id="priority">
+              <option value="low" {{ current_ticket.priority|default('low') == 'low' ? 'selected' }}>Low</option>
+              <option value="medium" {{ current_ticket.priority|default('') == 'medium' ? 'selected' }}>Medium</option>
+              <option value="high" {{ current_ticket.priority|default('') == 'high' ? 'selected' }}>High</option>
+            </Dselect>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">{{ (action == 'edit' or action == 'update') ? 'Update Ticket' : 'Create Ticket' }}</button>
+          <a href="tickets.php" class="btn btn-secondary" style="margin-left: 1rem;">Cancel</a>
+        </div>
+      </form>
+    </div>
+
+  {% elseif action == 'list' %}
+    <div class="grid-3">
+      {% if tickets|length == 0 %}
+        <p>No tickets found. Get started by creating one!</p>
+      {% endif %}
+
+      {% for ticket in tickets|sort((a, b) => a.id <=> b.id) %}
+        <div class="card" key="{{ ticket.id }}">
+          <div class="card-header">
+            <h3 class="card-title">{{ ticket.title }}</h3>
+            {{ statusTag(ticket.status) }}
+          </div>
+          <div class="card-body">
+            <p>{{ ticket.description|default('No description provided.') }}</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem"><strong>Priority:</strong> {{ ticket.priority|title }}</p>
+          </div>
+          <div class="card-footer">
+            <div class="card-actions">
+              <a href="tickets.php?action=edit&id={{ ticket.id }}" class="btn btn-secondary">Edit</a>
+              <a href="tickets.php?action=delete&id={{ ticket.id }}" class="btn btn-secondary" style="border-color: var(--error); color: var(--error)">Delete</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
